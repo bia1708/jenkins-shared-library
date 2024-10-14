@@ -1148,7 +1148,7 @@ private def run_agents() {
         println('Agent: ' + agent + ' Board: ' + board)
         println('Number of stages to run: ' + num_stages.toString())
 
-        if (gauntEnv.lock_agent) {
+        if (gauntEnv.enable_resource_queuing) {
             println('Locking agent: '+agent+'. Effectively only one test executor is running on the agent.')
             lock_agent = agent
         }
@@ -1163,12 +1163,12 @@ jobs[agent+"-"+board] = {
 }
 */
         if (gauntEnv.enable_docker) {
+            def lock_name = extractLockName(board, agent)
             if( enable_resource_queuing ){
                 println("Enable resource queueing")
                 jobs[agent + '-' + board] = {
-                    def lock_name = extractLockName(board, agent)
-                    echo "Acquiring lock for ${lock_name}"
                     lock(lock_agent){
+                        echo "Acquiring lock for ${lock_name}"
                         lock(lock_name){
                             oneNodeDocker(
                                 agent,
@@ -1187,7 +1187,8 @@ jobs[agent+"-"+board] = {
                  };
             }else{
                 jobs[agent + '-' + board] = {
-                    lock(lock_agent){ 
+                    echo "Acquiring lock for ${lock_name}"
+                    lock(lock_name){
                         oneNodeDocker(
                                 agent,
                                 num_stages,
@@ -1203,8 +1204,8 @@ jobs[agent+"-"+board] = {
                     }
                  };
             }
-            
-        } else{
+
+        } else {
             jobs[agent + '-' + board] = { oneNode(agent, num_stages, stages, board, docker_status) };
         }
     }
