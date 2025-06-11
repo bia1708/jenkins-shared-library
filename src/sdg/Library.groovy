@@ -26,6 +26,7 @@ class Library {
                         ip = nebula('uart.get-ip')
                         println('IP: ' + ip)
                         sh 'git clone https://github.com/analogdevicesinc/pyadi-iio.git'
+                        sh 'ls'
                         dir('pyadi-iio')
               {
                             sh 'ls'
